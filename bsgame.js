@@ -6,16 +6,85 @@ module.exports.initGame = function (sio, socket) {
   io = sio
   roomSocket = socket
   roomSocket.emit('connected', {message: 'New User Connected'})
+  
+  roomSocket.on('disconnect', (socket) => {
+    console.log('Player Disconnected')
+  })
 
   roomSocket.on('playerEntersRoom', playerEntersRoom)
   roomSocket.on('makePlayerGrid', makePlayerGrid)
-  console.log('playerEntersRoom')
+  roomSocket.on('shotFired', shotFired)
+  roomSocket.on('gameReset', reset)
+
+  console.log('New Player Connected')
+  // console.log(roomSocket)
 }
 
+function player (name, grid, id) {
+  this.name = name
+  this.socketId = id
+  this.grid = grid
+  this.shipDamage = [5,4,3,3,2]
+}
 
-function playerEntersRoom () {
+var gameBoard = {
+  turn: true,
+  playerA: undefined,
+  playerB: undefined
+}
+
+function reset () {
+  gameBoard.turn = true
+  gameBoard.playerA = undefined
+  gameBoard.playerB = undefined
+  console.log('Players reset')
+}
+function playerEntersRoom (data) {
+  console.log('Player Enters Room')
+  if (!gameBoard.playerA) {
+    gameBoard.playerA = new player (data.userName, data.grid, data.id)
+    console.log('Player A set ', gameBoard.playerA.socketId)
+  }
+  else if (!gameBoard.playerB) {
+    gameBoard.playerB = new player (data.userName, data.grid, data.id)
+    console.log('Player B set ', gameBoard.playerB.socketId)
+    setTimeout(gamePlay,1000)
+  }
+  else {
+    console.log('Room Full')
+    roomSocket.emit('Game Room Message', {message: 'Room Full, Please try again later'})
+  }
+}
+function gamePlay () {
+  var clientID = (gameBoard.turn) ? gameBoard.playerA.socketId : gameBoard.playerB.socketId
+  console.log(clientID)
+  roomSocket.broadcast
+  .emit('playersTurn', {message: 'Your shot'})
+  console.log('Game Play')
+}
+function shotFired (data) {
+  console.log('Shot Fired')
+  var clientA = gameBoard.playerA.socketId
+  var clientB = gameBoard.playerB.socketId
+
+  if (gameBoard.turn) { // PlayerA just shot
+    var shot = `x${data.target[0]}y${data.target[1]}`
+    console.log('A ', shot)
+    roomSocket.broadcast.to(clientA).emit('playMade', `.f${shot}`)
+    gameBoard.turn = false
+    roomSocket.emit('playMade', `.p${shot}`)
+    gamePlay()
+  } else {
+    var shot = `x${data.target[0]}y${data.target[1]}`
+    console.log('B ', shot)
+    roomSocket.broadcast.to(clientB).emit('playMade', `.f${shot}`)
+    gameBoard.turn = true
+    roomSocket.emit('playMade', `.p${shot}`)
+    gamePlay()
+  }
 
 }
+
 function makePlayerGrid (data) {
   // Make matrix that will serve as player board
   // console.log(data)
