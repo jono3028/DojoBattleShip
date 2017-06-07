@@ -14,13 +14,29 @@
       Loading...
     </div>
 
-<script id="lobby-template" type="text/template">
+<script id="login-template" type="text/template">
   <div class="ui middle aligned center aligned grid">
   <div class="ui stacked segment ">
     <label for="playerName">Enter a User Name: </label>
     <input type="text" id="playerName">
-    <button id="btnSetShips" class="ui button">Enlist</button>
+    <button id="btnToLobby" class="ui button">Enlist</button>
   </div>
+  </div>
+</script>
+
+<script id="lobby-template" type="text/template">
+  <div>
+      <p>Select a player to challenge:</p>
+      <ul id="playerList">
+      </ul>
+  </div>
+</script>
+
+<script id="challenge-template" type="text/template">
+  <div>
+      <p>Would like to challenge you to a game</p>
+      <button id="btnYes">Yes</button>
+      <button id="btnNo">No</button>
   </div>
 </script>
 
