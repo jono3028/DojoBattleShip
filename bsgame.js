@@ -1,7 +1,7 @@
 var io
 var roomSocket
 
-module.exports.initGame = function (sio, socket) {
+module.exports.initGame = (sio, socket) => {
   // console.log('server - initGame')
   io = sio
   roomSocket = socket
@@ -14,16 +14,16 @@ module.exports.initGame = function (sio, socket) {
   roomSocket.on('disconnect', (socket) => {
     console.log('Player Disconnected')
   })
-  roomSocket.on('New Player', (data) => {
-    io.emit('PlayerEntersLobby', data)
-  })
-  roomSocket.on('Send Challenge Request', sendChallengeRequest)
-  roomSocket.on('Accept Challenge', placePlayersInRoom)
-  roomSocket.on('Join Room', joinRoom)
-  roomSocket.on('Change Room', changeRoom)
-  roomSocket.on('playerEntersRoom', playerEntersRoom)
-  roomSocket.on('makePlayerGrid', makePlayerGrid)
-  roomSocket.on('shotFired', shotFired)
+  // roomSocket.on('New Player', (data) => {
+  //   io.emit('PlayerEntersLobby', data)
+  // })
+  // roomSocket.on('Send Challenge Request', sendChallengeRequest)
+  // roomSocket.on('Accept Challenge', placePlayersInRoom)
+  // roomSocket.on('Join Room', joinRoom)
+  // roomSocket.on('Change Room', changeRoom)
+  // roomSocket.on('playerEntersRoom', playerEntersRoom)
+  // roomSocket.on('makePlayerGrid', makePlayerGrid)
+  // roomSocket.on('shotFired', shotFired)
   roomSocket.on('gameReset', reset)
 
   console.log('Player Connected')
@@ -64,7 +64,7 @@ function joinRoom (room) {
   roomSocket.join(room)
 }
 function changeRoom (room) {
-  console.log('Change Room')
+  console.log('Change Room', roomSocket.id)
   roomSocket.leave(room.old)
   roomSocket.join(room.new)
   console.log(roomSocket.adapter.rooms)
@@ -112,7 +112,6 @@ function shotFired (data) {
     roomSocket.emit('playMade', `.p${shot}`)
     gamePlay()
   }
-
 }
 
 function makePlayerGrid (data) {

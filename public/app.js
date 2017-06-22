@@ -2,7 +2,7 @@
 // console.log('app.js')
 jQuery(function($){  
   var IO = {
-    init: () => {
+    init: function () {
       // console.log('app.js - init')
       IO.socket = io.connect()
 
@@ -10,9 +10,10 @@ jQuery(function($){
       IO.bindEvents()
       console.log(IO.socket)
     },
-    bindEvents: () => {
+    bindEvents: function () {
 
-      IO.socket.on('connected', IO.onConnected)
+      // IO.socket.on('connected', IO.onConnected)
+      IO.socket.emit('connected')
       IO.socket.on('PlayerEntersLobby', Battle.Player.addPlayer)
       IO.socket.on('Receive Challenge Request', Battle.Player.receiveChallengeRequest)
       IO.socket.on('Goto Pregame', Battle.Player.setShips)
@@ -20,7 +21,7 @@ jQuery(function($){
       IO.socket.on('playersTurn', Battle.playersTurn)
       IO.socket.on('playMade', Battle.playMade)
     },
-    onConnected: () => {
+    onConnected: function () {
       Battle.SocketID = IO.socket.id
     }
   }
@@ -32,13 +33,13 @@ jQuery(function($){
     numPlayersInRoom: 0,
     shot: [],
 
-    init: () => {
+    init: function () {
       Battle.showLogin() 
       Battle.cachePage()
       Battle.bindEvents() 
     },
     // Page views and templates
-    cachePage: () => {
+    cachePage: function () {
       Battle.$doc = $(document)
       // Templates
       Battle.$gameArea = $('#gameArea')
@@ -49,21 +50,21 @@ jQuery(function($){
       Battle.$templateGamePlay = $('#gamePlay-template').html()
     },
 
-    bindEvents: () => {
+    bindEvents: function () {
       Battle.$doc.on('click', '#btnToLobby', Battle.Player.enterLobby)
       Battle.$doc.on('click', '#btnSaveShips', Battle.Player.saveShipsClick)
       Battle.$doc.on('click', '#btnFireAtWill', Battle.gameFireClick)
       Battle.$doc.on('click', '#btnReset', function () {IO.socket.emit('gameReset')})
     },
-    showLogin: () => {
+    showLogin: function () {
       IO.socket.emit('Join Room', 'Global')
       
       Battle.$gameArea.html(Battle.$templateLogin)
     },
-    initChallenge: (event) => {
+    initChallenge: function (event) {
      
     },
-    makeGameRoom: (playerGrid) => {
+    makeGameRoom: function (playerGrid) {
       Battle.$gameArea.html(Battle.$templateGamePlay)
         // console.log('0------------')
       var field = '.playerBoard', tag = 'p'
@@ -89,10 +90,10 @@ jQuery(function($){
       IO.socket.emit('playerEntersRoom', data)
     },
     
-    roomMessage: (data) => {
+    roomMessage: function (data) {
       $('#gamePlay-message').html(data.message)
     },
-    playersTurn: (data) => {
+    playersTurn: function (data) {
       console.log('playersTurn')
       $('#gamePlay-message').html(data.message)
       $('.firingBoard td').click(function () {
@@ -102,14 +103,14 @@ jQuery(function($){
           $('#btnFireAtWill').removeAttr('disabled')
         })
     },
-    gameFireClick: () => {
+    gameFireClick: function () {
       console.log('gameFireClick')
       $('#target').html('')
       $('#gamePlay-message').html('')
       $('#btnFireAtWill').attr('disabled', 'disabled')
       IO.socket.emit('shotFired', {target: Battle.shot})
     },
-    playMade: (data) => {
+    playMade: function (data) {
       console.log('playMade - ',data)
       $(data).html('X')
     },
@@ -117,7 +118,7 @@ jQuery(function($){
       playerName: '',
       shipCoord: [[0,0],[0,1],[0,2],[0,3],[0,4]], // Ship position [data-x, data-y]
 
-      enterLobby: () => {
+      enterLobby: function () {
         Battle.Player.playerName = $('#playerName').val() || 'Captian Jack'
         Battle.SocketID = IO.socket.id
         // IO.socket.emit('connected', {roomName: Battle.SocketID})
@@ -148,16 +149,17 @@ jQuery(function($){
         $('#btnYes').click(function () {
           IO.socket.emit('Accept Challenge')
           IO.socket.emit('Change Room', {old: 'Global', new: 'Room1'})
+          Battle.Player.setShips()
         })
       },
-      setShips: () => {
+      setShips: function () {
         console.log('Player - setShipsClick')
         // Battle.Player.playerName = $('#playerName').val() || 'Captian Jack'
         // Battle.numPlayersInRoom++
         Battle.$gameArea.html(Battle.$templateSetGrid)
         console.log(Battle.Player.playerName)
       },
-      saveShipsClick: () => {
+      saveShipsClick: function () {
         console.log('Player - saveShipsClick')
         for (var _x = 0; _x < 5; _x++) {
           Battle.Player.shipCoord[_x][0] = $(`.drag-container div:nth-child(${_x+1})`).attr('data-x')
