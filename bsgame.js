@@ -1,22 +1,32 @@
 var io
 var roomSocket
 
-module.exports.initGame = function (sio, socket) {
-  console.log('server - initGame')
+module.exports.initGame = (sio, socket) => {
+  // console.log('server - initGame')
   io = sio
   roomSocket = socket
-  roomSocket.emit('connected', {message: 'New User Connected'})
-  
+  roomSocket.on('connected', (socket) => {
+    // roomSocket.join(socket.roomName)
+    console.log('Connected')
+    // console.log(roomSocket)
+
+  })
   roomSocket.on('disconnect', (socket) => {
     console.log('Player Disconnected')
   })
-
-  roomSocket.on('playerEntersRoom', playerEntersRoom)
-  roomSocket.on('makePlayerGrid', makePlayerGrid)
-  roomSocket.on('shotFired', shotFired)
+  // roomSocket.on('New Player', (data) => {
+  //   io.emit('PlayerEntersLobby', data)
+  // })
+  // roomSocket.on('Send Challenge Request', sendChallengeRequest)
+  // roomSocket.on('Accept Challenge', placePlayersInRoom)
+  // roomSocket.on('Join Room', joinRoom)
+  // roomSocket.on('Change Room', changeRoom)
+  // roomSocket.on('playerEntersRoom', playerEntersRoom)
+  // roomSocket.on('makePlayerGrid', makePlayerGrid)
+  // roomSocket.on('shotFired', shotFired)
   roomSocket.on('gameReset', reset)
 
-  console.log('New Player Connected')
+  console.log('Player Connected')
   // console.log(roomSocket)
 }
 
@@ -38,6 +48,26 @@ function reset () {
   gameBoard.playerA = undefined
   gameBoard.playerB = undefined
   console.log('Players reset')
+}
+function sendChallengeRequest (data) {
+  console.log('sendChallengeRequest')
+  var recip = data.challengedPlayerId
+  roomSocket.to(recip).emit('Receive Challenge Request', data)
+}
+function placePlayersInRoom () {
+  console.log('placePlayersInRoom')
+  console.log(roomSocket.adapter.rooms)
+  // console.log(roomSocket)
+}
+function joinRoom (room) {
+  console.log('Join Room')
+  roomSocket.join(room)
+}
+function changeRoom (room) {
+  console.log('Change Room', roomSocket.id)
+  roomSocket.leave(room.old)
+  roomSocket.join(room.new)
+  console.log(roomSocket.adapter.rooms)
 }
 function playerEntersRoom (data) {
   console.log('Player Enters Room')
@@ -82,7 +112,6 @@ function shotFired (data) {
     roomSocket.emit('playMade', `.p${shot}`)
     gamePlay()
   }
-
 }
 
 function makePlayerGrid (data) {
