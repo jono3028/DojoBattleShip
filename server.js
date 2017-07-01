@@ -76,7 +76,7 @@ io.on('connection', function (socket) {
     }
     else {
       console.log('Room Full')
-      roomSocket.emit('Game Room Message', {message: 'Room Full, Please try again later'})
+      socket.emit('Game Room Message', {message: 'Room Full, Please try again later'})
     }
   })
 
@@ -85,19 +85,31 @@ io.on('connection', function (socket) {
     var clientA = gameBoard.playerA.socketId
     var clientB = gameBoard.playerB.socketId
 
-    if (gameBoard.turn) { // PlayerA just shot
+    if (gameBoard.turn) { // PlayerA's turn
       var shot = `x${data.target[0]}y${data.target[1]}`
       console.log('A ', shot)
       socket.broadcast.to(clientB).emit('playMade', `.p${shot}`)
       gameBoard.turn = false
       socket.emit('playMade', `.f${shot}`)
+      var gridVal = gameBoard.playerB.grid[data.target[1]][data.target[0]]
+      if (gridVal > 0) {
+        gameBoard.playerB.shipDamage[gridVal - 1] -= 1
+        socket.broadcast.to('Room1').emit('Game Room Message', {message: 'Hit'})
+      }
+      console.log(gameBoard.playerB.grid)
       gamePlay()
-    } else {
+    } else { // PlayerB's turn
       var shot = `x${data.target[0]}y${data.target[1]}`
       console.log('B ', shot)
       socket.broadcast.to(clientA).emit('playMade', `.p${shot}`)
       gameBoard.turn = true
       socket.emit('playMade', `.f${shot}`)
+      var gridVal = gameBoard.playerA.grid[data.target[1]][data.target[0]]
+      if (gridVal > 0) {
+        gameBoard.playerA.shipDamage[gridVal - 1] -= 1
+        io.to('Room1').emit('Game Room Message', {message: 'Hit'})
+      }
+      console.log(gameBoard.playerA.grid)      
       gamePlay()
     }
   })
@@ -105,8 +117,7 @@ io.on('connection', function (socket) {
   function gamePlay () {
     var clientID = (gameBoard.turn) ? gameBoard.playerA.socketId : gameBoard.playerB.socketId
     console.log(clientID)
-    socket.broadcast
-    .emit('playersTurn', {message: 'Your shot'})
+    socket.broadcast.emit('playersTurn', {message: 'Your shot'})
     console.log('Game Play')
   }
 
