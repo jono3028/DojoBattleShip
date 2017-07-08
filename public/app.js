@@ -94,7 +94,7 @@ jQuery(function($){
       $('#gamePlay-message').html(data.message)
     },
     playersTurn: function (data) {
-      console.log('playersTurn')
+      // console.log('playersTurn')
       $('#gamePlay-message').html(data.message)
       $('.firingBoard td').click(function () {
           var coord = $(this).attr('class')
@@ -104,14 +104,14 @@ jQuery(function($){
         })
     },
     gameFireClick: function () {
-      console.log('gameFireClick')
+      // console.log('gameFireClick')
       $('#target').html('')
       $('#gamePlay-message').html('')
       $('#btnFireAtWill').attr('disabled', 'disabled')
       IO.socket.emit('shotFired', {target: Battle.shot})
     },
     playMade: function (data) {
-      console.log('playMade - ',data)
+      // console.log('playMade - ',data)
       $(data).html('X')
     },
     Player: {
@@ -121,12 +121,10 @@ jQuery(function($){
       enterLobby: function () {
         Battle.Player.playerName = $('#playerName').val() || 'Captian Jack'
         Battle.SocketID = IO.socket.id
-        // IO.socket.emit('connected', {roomName: Battle.SocketID})
         Battle.$gameArea.html(Battle.$templateLobby)
-        // $('#playerList').append('li').html(Battle.Player.playerName)
         data = {id: Battle.SocketID, name: Battle.Player.playerName}
         IO.socket.emit('New Player', data)
-        console.log(`${Battle.Player.playerName} entering lobby`)
+        // console.log(`${Battle.Player.playerName} entering lobby`)
       },
       addPlayer: function (data) {
         $('#playerList').append(`<li><button class="btnChallengePlayer" data="${data.id}">${data.name}</button></li>`)
@@ -136,16 +134,16 @@ jQuery(function($){
             challengerPlayerId: Battle.SocketID,
             challengerPlayerName: Battle.Player.playerName
           }
-          console.log(newdata)
+          // console.log(newdata)
           IO.socket.emit('Send Challenge Request', newdata)
           IO.socket.emit('Change Room', {old: 'Global', new: 'Room1'})
           
         })
-        console.log('addPlayer')
+        // console.log('addPlayer')
       },
       receiveChallengeRequest: function (data) {
         Battle.$gameArea.html(Battle.$templateChallenge)
-        console.log('receiveChallenge')
+        // console.log('receiveChallenge')
         $('#btnYes').click(function () {
           IO.socket.emit('Accept Challenge')
           IO.socket.emit('Change Room', {old: 'Global', new: 'Room1'})
@@ -153,24 +151,16 @@ jQuery(function($){
         })
       },
       setShips: function () {
-        console.log('Player - setShipsClick')
-        // Battle.Player.playerName = $('#playerName').val() || 'Captian Jack'
-        // Battle.numPlayersInRoom++
+        // console.log('Player - setShipsClick')
         Battle.$gameArea.html(Battle.$templateSetGrid)
-        console.log(Battle.Player.playerName)
+        // console.log(Battle.Player.playerName)
       },
       saveShipsClick: function () {
-        console.log('Player - saveShipsClick')
+        // console.log('Player - saveShipsClick')
         for (var _x = 0; _x < 5; _x++) {
           Battle.Player.shipCoord[_x][0] = $(`.drag-container div:nth-child(${_x+1})`).attr('data-x')
           Battle.Player.shipCoord[_x][1] = $(`.drag-container div:nth-child(${_x+1})`).attr('data-y')
         }
-        // console.log(Battle.Player.shipCoord)
-        // var data = {
-        //   playerName: Battle.Player.playerName,
-        //   gridSettings: Battle.Player.shipCoord
-        // }
-        // IO.socket.emit('makePlayerGrid', data)
         var playerGrid = 
           [['x','x','x','x','x','x','x','x','x','x'],
           ['x','x','x','x','x','x','x','x','x','x'],
@@ -187,7 +177,6 @@ jQuery(function($){
 
         for (var _i = 0; _i < 5; _i++){
           for (var _x = 0; _x < shipLength[_i]; _x++ ){
-            // console.log(_i)
             var dataX = (parseInt(Battle.Player.shipCoord[_i][0])/50)+(_x)
             var dataY = ((parseInt(Battle.Player.shipCoord[_i][1])+(50*_i))/50)
             playerGrid[dataY][dataX] = (_i+1)
